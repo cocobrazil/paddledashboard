@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Pine Beach SUP Dashboard</title>
+
+<style>
+body{
+    margin:0;
+    background:#111;
+    color:white;
+    font-family:Arial, sans-serif;
+    padding:20px;
+}
+
+h1{
+    font-size:48px;
+    margin-bottom:10px;
+}
+
+.current{
+    display:flex;
+    gap:40px;
+    margin-bottom:30px;
+}
+
+.card{
+    background:#222;
+    padding:20px;
+    border-radius:20px;
+    min-width:200px;
+}
+
+.big{
+    font-size:64px;
+    font-weight:bold;
+}
+
+.label{
+    font-size:24px;
+    opacity:0.7;
+}
+
+.hourly{
+    display:flex;
+    overflow-x:auto;
+    gap:15px;
+}
+
+.hour{
+    background:#222;
+    padding:15px;
+    border-radius:15px;
+    min-width:120px;
+    text-align:center;
+}
+
+.good{
+    color:#5cff5c;
+}
+
+.caution{
+    color:yellow;
+}
+
+.bad{
+    color:#ff6666;
+}
+
+iframe{
+    width:100%;
+    height:400px;
+    border:none;
+    border-radius:20px;
+    margin-top:20px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Pine Beach SUP Dashboard</h1>
+
+<div class="current">
+
+<div class="card">
+<div class="label">Temperature</div>
+<div id="temp" class="big">--</div>
+</div>
+
+<div class="card">
+<div class="label">Wind</div>
+<div id="wind" class="big">--</div>
+</div>
+
+<div class="card">
+<div class="label">Gusts</div>
+<div id="gusts" class="big">--</div>
+</div>
+
+<div class="card">
+<div class="label">AQI</div>
+<div id="aqi" class="big">--</div>
+</div>
+
+</div>
+
+<div class="card">
+<div class="label">Paddle Conditions</div>
+<div id="rating" class="big">--</div>
+</div>
+
+<h2>Hourly Forecast</h2>
+
+<div id="hourly" class="hourly"></div>
+
+<iframe
+src="https://embed.windy.com/embed2.html?lat=45.431&lon=-73.742&detailLat=45.431&detailLon=-73.742&width=650&height=450&zoom=10&level=surface&overlay=wind&menu=&message=true">
+</iframe>
+
+<script>
+
+async function loadWeather(){
+
+const weatherURL =
+'https://api.open-meteo.com/v1/forecast?latitude=45.431&longitude=-73.742&current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,precipitation_probability&timezone=auto';
+
+const airURL =
+'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=45.431&longitude=-73.742&current=us_aqi';
+
+const weatherResponse = await fetch(weatherURL);
+const weatherData = await weatherResponse.json();
+
+const airResponse = await fetch(airURL);
+const airData = await airResponse.json();
+
+const current = weatherData.current;
+
+document.getElementById('temp').innerHTML =
+Math.round(current.temperature_2m) + '°C';
+
+document.getElementById('wind').innerHTML =
+Math.round(current.wind_speed_10m) + ' km/h';
+
+document.getElementById('gusts').innerHTML =
+Math.round(current.wind_gusts_10m) + ' km/h';
+
+document.getElementById('aqi').innerHTML =
+airData.current.us_aqi;
+
+const wind = current.wind_speed_10m;
+const gusts = current.wind_gusts_10m;
+
+let rating = '';
+let ratingClass = '';
+
+if(wind < 10 && gusts < 15){
+    rating = 'EXCELLENT';
+    ratingClass = 'good';
+}
+else if(wind < 18){
+    rating = 'CAUTION';
+    ratingClass = 'caution';
+}
+else{
+    rating = 'NO GO';
+    ratingClass = 'bad';
+}
+
+document.getElementById('rating').innerHTML =
+'<span class="' + ratingClass + '">' + rating + '</span>';
+
+const hourlyDiv = document.getElementById('hourly');
+
+hourlyDiv.innerHTML = '';
+
+for(let i = 0; i < 12; i++){
+
+    const hour = weatherData.hourly.time[i].split('T')[1];
+
+    hourlyDiv.innerHTML += `
+    <div class="hour">
+        <div>${hour}</div>
+        <div>${Math.round(weatherData.hourly.temperature_2m[i])}°C</div>
+        <div>${Math.round(weatherData.hourly.wind_speed_10m[i])} km/h</div>
+        <div>💨 ${Math.round(weatherData.hourly.wind_gusts_10m[i])}</div>
+        <div>☔ ${weatherData.hourly.precipitation_probability[i]}%</div>
+    </div>
+    `;
+}
+
+}
+
+loadWeather();
+
+setInterval(loadWeather, 600000);
+
+</script>
+
+</body>
+</html>
