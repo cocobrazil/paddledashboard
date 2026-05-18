@@ -9,16 +9,35 @@
 <style>
 body{
     margin:0;
-    background:#111;
+    background: linear-gradient(180deg,#041424 0%, #071b2b 60%);
     color:white;
-    font-family:Arial, sans-serif;
+    font-family:"Segoe UI", Roboto, Arial, sans-serif;
     padding:12px;
 }
 
 h1{
-    font-size:38px;
-    margin-bottom:10px;
+    font-size:20px;
+    margin:0 0 6px 0;
+    letter-spacing:1px;
 }
+
+.header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+}
+.brand{
+    display:flex;
+    align-items:center;
+    gap:12px;
+}
+.logo{
+    width:36px;height:36px;border-radius:6px;background:linear-gradient(180deg,#fff,#ddd);display:flex;align-items:center;justify-content:center;color:#033; font-weight:700;
+}
+.location{opacity:0.9;font-size:14px}
+.updated{font-size:12px;opacity:0.8;text-align:right}
 
 .current{
     display:flex;
@@ -34,6 +53,30 @@ h1{
     min-width:160px;
 }
 
+.paddle-banner{
+    background: linear-gradient(90deg,#0d5f1e,#1d8b33);
+    border-radius:14px;
+    padding:12px 16px;
+    display:flex;
+    align-items:center;
+    gap:16px;
+    margin-bottom:12px;
+}
+.paddle-icon{width:48px;height:48px;border-radius:999px;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-size:24px}
+.paddle-text{flex:1}
+.paddle-title{font-size:12px;opacity:0.9}
+.paddle-rating{font-size:34px;font-weight:900;letter-spacing:1px}
+.paddle-desc{opacity:0.9;font-size:13px}
+.paddle-emoji{font-size:34px;padding:6px;border-radius:999px;background:rgba(255,255,255,0.03);min-width:48px;text-align:center}
+
+.paddle-banner.paddle-good{background: linear-gradient(90deg,#0d5f1e,#1d8b33);}
+.paddle-banner.paddle-caution{background: linear-gradient(90deg,#7a5b00,#b27f00);}
+.paddle-banner.paddle-bad{background: linear-gradient(90deg,#5b0f0f,#8b1b1b);}
+
+.paddle-divider{width:1px;height:56px;background:rgba(255,255,255,0.06);margin:0 12px;border-radius:2px}
+.paddle-right{display:flex;align-items:center;gap:12px}
+.paddle-emoji svg{width:48px;height:48px;display:block}
+
 .big{
     font-size:48px;
     font-weight:bold;
@@ -44,20 +87,32 @@ h1{
     opacity:0.7;
 }
 
+.metrics{display:flex;gap:12px;margin-bottom:12px;flex-wrap:wrap}
+.metric-card{background:linear-gradient(180deg,#042233,#07283b);border-radius:12px;padding:12px;flex:1;min-width:120px;display:flex;flex-direction:column;gap:8px}
+.metric-top{display:flex;align-items:center;justify-content:space-between}
+.metric-icon{width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;font-size:20px}
+.metric-value{font-size:30px;font-weight:800}
+.metric-sub{font-size:12px;opacity:0.8}
+
+.hourly-container{background:linear-gradient(180deg, rgba(255,255,255,0.03), rgba(255,255,255,0.02));border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:10px;margin-bottom:12px}
 .hourly{
     display:flex;
-    flex-wrap:wrap;
-    gap:10px;
-    align-items:flex-start;
+    gap:8px;
+    overflow-x:auto;
+    padding:6px 4px;
 }
 
 .hour{
-    background:#222;
-    padding:10px;
-    border-radius:12px;
-    min-width:90px;
+    background:linear-gradient(180deg,#042233,#062936);
+    padding:8px;
+    border-radius:10px;
+    min-width:78px;
     text-align:center;
+    color:#dbeefd;
+    border:1px solid rgba(255,255,255,0.03);
 }
+.hour .temp{font-size:16px;font-weight:700}
+.hour .icon{font-size:18px}
 
 .good{
     color:#5cff5c;
@@ -96,53 +151,93 @@ h1{
 }
 
 @media (max-width:600px) {
-    h1{ font-size:22px; }
-    .big{ font-size:32px; }
+    h1{ font-size:18px; }
+    .big{ font-size:28px; }
 }
 </style>
 </head>
 
 <body>
 
-<h1>Pine Beach SUP Dashboard</h1>
-<div class="card" style="margin-bottom:12px;">
-    <div class="label">Paddle Conditions</div>
-    <div id="rating" class="big rating-badge" aria-live="polite">--</div>
+<div class="header">
+    <div class="brand">
+        <div class="logo">P</div>
+        <div>
+            <h1>PINE BEACH PARK <span style="opacity:0.8;font-size:12px">| DORVAL, QC</span></h1>
+            <div class="location">Water access • Sheltered bay</div>
+        </div>
+    </div>
+    <div class="updated" id="updated">Updated: --</div>
 </div>
 
-<div class="current">
+<div class="paddle-banner" id="paddleBanner">
+    <div class="paddle-icon">
+        <!-- simple paddle/person icon -->
+        <svg width="36" height="36" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="6" cy="6" r="2" fill="#fff" opacity="0.9" />
+            <rect x="9" y="4" width="10" height="3" rx="1" fill="#fff" opacity="0.9" transform="rotate(20 9 4)" />
+            <path d="M4 14c2-2 6-2 8 0s6 2 8 0" stroke="#fff" stroke-opacity="0.6" stroke-width="1" fill="none" />
+        </svg>
+    </div>
+    <div class="paddle-text">
+        <div class="paddle-title">PADDLE CONDITIONS</div>
+        <div class="paddle-rating" id="rating">--</div>
+    </div>
+    <div class="paddle-divider"></div>
+    <div class="paddle-right">
+      <div class="paddle-emoji" id="paddleEmoji"></div>
+      <div class="paddle-desc" id="paddleDesc">--</div>
+    </div>
+  </div>
 
-<div class="card">
-<div class="label">Temperature</div>
-<div id="temp" class="big">--</div>
+<div class="metrics">
+    <div class="metric-card">
+        <div class="metric-top"><div class="metric-icon"> 
+            <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M14 14.76V5a2 2 0 10-4 0v9.76A4 4 0 1014 14.76z" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div><div class="metric-value" id="temp">--</div></div>
+        <div class="metric-sub">Temperature</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-top"><div class="metric-icon"> 
+            <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M3 8h13a3 3 0 100-6" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M3 12h9a2 2 0 100-4" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div><div class="metric-value" id="wind">--</div></div>
+        <div class="metric-sub" id="windDir">Wind</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-top"><div class="metric-icon"> 
+            <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M4 17h12a3 3 0 100-6" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M20 12a2 2 0 110 4" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div><div class="metric-value" id="gusts">--</div></div>
+        <div class="metric-sub">Gusts</div>
+    </div>
+    <div class="metric-card">
+        <div class="metric-top"><div class="metric-icon"> 
+            <svg width="28" height="28" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path d="M21 11.5A8.38 8.38 0 0012.5 3 8.5 8.5 0 003 12.5" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/><path d="M21 11.5c0 4.97-4.03 9-9 9" fill="none" stroke="#bfe8ff" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        </div><div class="metric-value" id="aqi">--</div></div>
+        <div class="metric-sub">Air Quality</div>
+    </div>
 </div>
 
-<div class="card">
-<div class="label">Wind</div>
-<div id="wind" class="big">--</div>
+<div class="hourly-container">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><div style="font-weight:700">HOURLY FORECAST · DAYLIGHT HOURS</div><div id="sunTimes" style="font-size:12px;opacity:0.8"></div></div>
+    <div id="hourly" class="hourly"></div>
 </div>
 
-<div class="card">
-<div class="label">Gusts</div>
-<div id="gusts" class="big">--</div>
+<div class="card" style="padding:10px;display:flex;gap:10px;align-items:center;justify-content:space-between">
+    <div style="display:flex;gap:12px;align-items:center">
+        <div style="text-align:center"><div style="font-size:18px">🌡️</div><div style="font-weight:700" id="waterTemp">--</div><div style="font-size:12px;opacity:0.8">Water Temp</div></div>
+        <div style="text-align:center"><div style="font-size:18px">💧</div><div style="font-weight:700" id="humidity">--</div><div style="font-size:12px;opacity:0.8">Humidity</div></div>
+    </div>
+    <div style="display:flex;gap:18px;align-items:center">
+        <div style="text-align:center"><div style="font-size:18px">☀️</div><div style="font-weight:700" id="uv">--</div><div style="font-size:12px;opacity:0.8">UV Index</div></div>
+        <div style="text-align:center"><div style="font-size:18px">⏱️</div><div style="font-weight:700" id="pressure">--</div><div style="font-size:12px;opacity:0.8">Pressure</div></div>
+    </div>
 </div>
-
-<div class="card">
-<div class="label">AQI</div>
-<div id="aqi" class="big">--</div>
-</div>
-
-</div>
-
-<h2>Hourly Forecast (Daylight Only)</h2>
-
-<div id="hourly" class="hourly"></div>
 <script>
 
 async function loadWeather(){
 
 const weatherURL =
-    'https://api.open-meteo.com/v1/forecast?latitude=45.431&longitude=-73.742&current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,precipitation_probability&daily=sunrise,sunset&timezone=auto';
+    'https://api.open-meteo.com/v1/forecast?latitude=45.431&longitude=-73.742&current=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=temperature_2m,apparent_temperature,wind_speed_10m,wind_gusts_10m,precipitation_probability,relativehumidity_2m,surface_pressure,uv_index&daily=sunrise,sunset&timezone=auto';
 
 const airURL =
 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=45.431&longitude=-73.742&current=us_aqi';
@@ -167,23 +262,47 @@ Math.round(current.wind_gusts_10m) + ' km/h';
 document.getElementById('aqi').innerHTML =
 airData.current.us_aqi;
 
+const aqi = airData.current.us_aqi;
+
 const wind = current.wind_speed_10m;
 const gusts = current.wind_gusts_10m;
+const windDirDeg = current.wind_direction_10m;
 
 let rating = '';
 let ratingClass = '';
+// determine "feels like" temperature if available
+const apparent = (current.apparent_temperature !== undefined && current.apparent_temperature !== null) ? current.apparent_temperature : current.temperature_2m;
 
-if(wind < 10 && gusts < 15){
-    rating = 'EXCELLENT';
-    ratingClass = 'good';
+// decision rules
+const reasons = [];
+let noGo = false;
+let caution = false;
+
+// Wind rules (user: don't paddle if wind > 15 km/h)
+if (wind > 15) { reasons.push('Wind ' + Math.round(wind) + ' km/h — too strong'); noGo = true; }
+else if (wind >= 12) { reasons.push('Wind ' + Math.round(wind) + ' km/h — near limit'); caution = true; }
+
+// Gusts (consider gusts separately)
+if (gusts > 22) { reasons.push('Gusts ' + Math.round(gusts) + ' km/h — gusty'); noGo = true; }
+else if (gusts >= 16) { reasons.push('Gusts ' + Math.round(gusts) + ' km/h — watch gusts'); caution = true; }
+
+// Temperature rule (user: if feels like 19°C or less don't paddle)
+if (apparent <= 19) { reasons.push('Feels like ' + Math.round(apparent) + '°C — too cold'); noGo = true; }
+else if (apparent <= 21) { reasons.push('Feels like ' + Math.round(apparent) + '°C — a bit cool'); caution = true; }
+
+// Air quality: consider AQI >100 as not recommended for physical activity
+if (aqi !== undefined && aqi !== null) {
+    if (aqi > 100) { reasons.push('AQI ' + aqi + ' — poor air quality'); noGo = true; }
+    else if (aqi > 75) { reasons.push('AQI ' + aqi + ' — moderate/noticeable'); caution = true; }
 }
-else if(wind < 18){
-    rating = 'CAUTION';
-    ratingClass = 'caution';
-}
-else{
-    rating = 'NO GO';
-    ratingClass = 'bad';
+
+// Final rating
+if (noGo) {
+    rating = 'NO GO'; ratingClass = 'bad';
+} else if (caution) {
+    rating = 'CAUTION'; ratingClass = 'caution';
+} else {
+    rating = 'EXCELLENT'; ratingClass = 'good';
 }
 
 const ratingEl = document.getElementById('rating');
@@ -193,6 +312,44 @@ if(ratingClass === 'good') ratingEl.classList.add('rating-good');
 else if(ratingClass === 'caution') ratingEl.classList.add('rating-caution');
 else ratingEl.classList.add('rating-bad');
 ratingEl.textContent = rating;
+
+// set paddle description
+const descEl = document.getElementById('paddleDesc');
+if(rating === 'EXCELLENT'){
+    descEl.textContent = 'Light winds and calm conditions. Perfect for a great day on the water!';
+} else if(rating === 'CAUTION'){
+    descEl.textContent = 'Warning: ' + (reasons.length ? reasons.join(' · ') : 'Conditions approaching limits.');
+} else {
+    descEl.textContent = 'Do not paddle: ' + (reasons.length ? reasons.join(' · ') : 'Unsafe conditions.');
+}
+
+// update header timestamp
+document.getElementById('updated').textContent = 'Updated: ' + new Date().toLocaleString();
+
+// wind direction to cardinal
+function degToCardinal(deg){
+    if(deg === null || deg === undefined) return '';
+    const directions = ['N','NNE','NE','ENE','E','ESE','SE','SSE','S','SSW','SW','WSW','W','WNW','NW','NNW'];
+    const index = Math.round(((deg %= 360) < 0 ? deg + 360 : deg) / 22.5) % 16;
+    return directions[index];
+}
+const windDirEl = document.getElementById('windDir');
+if(windDirDeg !== undefined && windDirDeg !== null) windDirEl.textContent = degToCardinal(windDirDeg) + ' • From ' + Math.round(windDirDeg) + '°';
+
+// update paddle banner color and emoji
+const paddleBanner = document.getElementById('paddleBanner');
+const paddleEmoji = document.getElementById('paddleEmoji');
+paddleBanner.classList.remove('paddle-good','paddle-caution','paddle-bad');
+if(rating === 'EXCELLENT'){
+    paddleBanner.classList.add('paddle-good');
+    if(paddleEmoji) paddleEmoji.innerHTML = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,0.06)"/><circle cx="17" cy="18" r="3" fill="#fff" opacity="0.95"/><circle cx="31" cy="18" r="3" fill="#fff" opacity="0.95"/><path d="M16 30c4 4 12 4 16 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+} else if(rating === 'CAUTION'){
+    paddleBanner.classList.add('paddle-caution');
+    if(paddleEmoji) paddleEmoji.innerHTML = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,0.06)"/><circle cx="17" cy="18" r="3" fill="#fff" opacity="0.95"/><circle cx="31" cy="18" r="3" fill="#fff" opacity="0.95"/><path d="M16 32h16" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+} else {
+    paddleBanner.classList.add('paddle-bad');
+    if(paddleEmoji) paddleEmoji.innerHTML = '<svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><circle cx="24" cy="24" r="22" fill="rgba(255,255,255,0.06)"/><circle cx="17" cy="18" r="3" fill="#fff" opacity="0.95"/><circle cx="31" cy="18" r="3" fill="#fff" opacity="0.95"/><path d="M16 34c4-4 12-4 16 0" stroke="#fff" stroke-width="2" fill="none" stroke-linecap="round"/></svg>';
+}
 
 const hourlyDiv = document.getElementById('hourly');
 hourlyDiv.innerHTML = '';
@@ -208,12 +365,19 @@ if (weatherData.daily && weatherData.daily.sunrise && weatherData.daily.sunset) 
         sunrise = null; sunset = null;
     }
 }
+if (sunrise && sunset){
+    const sunEl = document.getElementById('sunTimes');
+    if(sunEl) sunEl.textContent = sunrise.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'}) + ' – ' + sunset.toLocaleTimeString([], {hour:'numeric',minute:'2-digit'});
+}
 
 const times = weatherData.hourly.time;
 const tempArr = weatherData.hourly.temperature_2m || [];
 const windArr = weatherData.hourly.wind_speed_10m || [];
 const gustsArr = weatherData.hourly.wind_gusts_10m || [];
 const precipArr = weatherData.hourly.precipitation_probability || [];
+const humArr = weatherData.hourly.relativehumidity_2m || [];
+const pressureArr = weatherData.hourly.surface_pressure || [];
+const uvArr = weatherData.hourly.uv_index || [];
 
 const daylightIndices = [];
 for (let i = 0; i < times.length; i++){
@@ -248,6 +412,22 @@ for (const idx of daylightIndices){
     </div>
     `;
 }
+
+// populate bottom stats using nearest hour index
+let nearestIdx = 0;
+try{
+    const now = new Date();
+    for(let i=0;i<times.length;i++){
+        const d = new Date(times[i]);
+        if(d.getDate() === now.getDate() && d.getHours() === now.getHours()){ nearestIdx = i; break; }
+    }
+} catch(e){ nearestIdx = 0; }
+
+document.getElementById('humidity').textContent = (humArr[nearestIdx] !== undefined) ? Math.round(humArr[nearestIdx]) + '%' : '--';
+document.getElementById('pressure').textContent = (pressureArr[nearestIdx] !== undefined) ? Math.round(pressureArr[nearestIdx]) + ' hPa' : '--';
+document.getElementById('uv').textContent = (uvArr[nearestIdx] !== undefined) ? uvArr[nearestIdx] : '--';
+// water temp not available from this API — leave placeholder
+document.getElementById('waterTemp').textContent = '--';
 
 }
 
