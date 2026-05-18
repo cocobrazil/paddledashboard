@@ -2,140 +2,147 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Pine Beach SUP Dashboard</title>
 
 <style>
 body{
     margin:0;
-    background:#0f0f0f;
+    background:#111;
     color:white;
     font-family:Arial, sans-serif;
     padding:12px;
-    overflow-x:hidden;
 }
 
-/* Header */
 h1{
-    font-size:34px;
-    margin:5px 0 10px 0;
+    font-size:38px;
+    margin-bottom:10px;
 }
 
-/* Paddle condition top */
-.paddle{
-    background:#1e1e1e;
-    padding:14px;
-    border-radius:16px;
-    margin-bottom:12px;
-    text-align:center;
-}
-
-.paddle .label{
-    font-size:16px;
-    opacity:0.7;
-}
-
-.paddle .big{
-    font-size:34px;
-    font-weight:bold;
-}
-
-/* 4 main cards grid */
-.grid{
-    display:grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap:10px;
-    margin-bottom:12px;
+.current{
+    display:flex;
+    gap:20px;
+    margin-bottom:18px;
+    flex-wrap:wrap;
 }
 
 .card{
-    background:#1c1c1c;
-    padding:12px;
+    background:#222;
+    padding:14px;
     border-radius:14px;
-    text-align:center;
+    min-width:160px;
 }
 
 .big{
-    font-size:34px;
+    font-size:48px;
     font-weight:bold;
 }
 
 .label{
-    font-size:14px;
+    font-size:24px;
     opacity:0.7;
-    margin-bottom:5px;
 }
 
-/* Hourly */
 .hourly{
     display:flex;
-    overflow-x:auto;
+    flex-wrap:wrap;
     gap:10px;
-    padding-bottom:5px;
+    align-items:flex-start;
 }
 
 .hour{
-    background:#1c1c1c;
+    background:#222;
     padding:10px;
     border-radius:12px;
     min-width:90px;
     text-align:center;
-    font-size:12px;
 }
 
-/* Colors */
-.good{ color:#5cff5c; }
-.caution{ color:yellow; }
-.bad{ color:#ff6666; }
+.good{
+    color:#5cff5c;
+}
 
+.caution{
+    color:yellow;
+}
+
+.bad{
+    color:#ff6666;
+}
+
+/* paddle rating badge styles */
+.rating-badge{
+    display:inline-block;
+    padding:10px 16px;
+    border-radius:999px;
+    font-size:28px;
+    font-weight:800;
+    text-align:center;
+    min-width:180px;
+}
+.rating-good{ background:#0a6b1a; color:#eaffea; }
+.rating-caution{ background:#b27f00; color:#1b1000; }
+.rating-bad{ background:#8b1b1b; color:#fff2f2; }
+
+/* iframe removed for smaller tablet layout */
+
+@media (max-width:900px) and (orientation:landscape) {
+    body{ padding:8px; }
+    h1{ font-size:28px; }
+    .big{ font-size:40px; }
+    .card{ min-width:140px; padding:10px; }
+    .hour{ min-width:80px; padding:8px; }
+}
+
+@media (max-width:600px) {
+    h1{ font-size:22px; }
+    .big{ font-size:32px; }
+}
 </style>
 </head>
 
 <body>
 
-<h1>Pine Beach SUP 🌊</h1>
-
-<!-- PADDLE CONDITIONS FIRST -->
-<div class="paddle">
+<h1>Pine Beach SUP Dashboard</h1>
+<div class="card" style="margin-bottom:12px;">
     <div class="label">Paddle Conditions</div>
-    <div id="rating" class="big">--</div>
+    <div id="rating" class="big rating-badge" aria-live="polite">--</div>
 </div>
 
-<!-- 4 MAIN METRICS -->
-<div class="grid">
+<div class="current">
 
-    <div class="card">
-        <div class="label">🌡️ Temp</div>
-        <div id="temp" class="big">--</div>
-    </div>
+<div class="card">
+<div class="label">Temperature</div>
+<div id="temp" class="big">--</div>
+</div>
 
-    <div class="card">
-        <div class="label">💨 Wind</div>
-        <div id="wind" class="big">--</div>
-    </div>
+<div class="card">
+<div class="label">Wind</div>
+<div id="wind" class="big">--</div>
+</div>
 
-    <div class="card">
-        <div class="label">🌪️ Gusts</div>
-        <div id="gusts" class="big">--</div>
-    </div>
+<div class="card">
+<div class="label">Gusts</div>
+<div id="gusts" class="big">--</div>
+</div>
 
-    <div class="card">
-        <div class="label">🌫️ AQI</div>
-        <div id="aqi" class="big">--</div>
-    </div>
+<div class="card">
+<div class="label">AQI</div>
+<div id="aqi" class="big">--</div>
+</div>
 
 </div>
 
-<h2 style="font-size:18px;margin:10px 0;">Daylight Forecast</h2>
+<h2>Hourly Forecast (Daylight Only)</h2>
+
 <div id="hourly" class="hourly"></div>
-
 <script>
 
 async function loadWeather(){
 
 const weatherURL =
-'https://api.open-meteo.com/v1/forecast?latitude=45.431&longitude=-73.742&current=temperature_2m,wind_speed_10m,wind_gusts_10m&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,precipitation_probability,sunrise,sunset&timezone=auto';
+    'https://api.open-meteo.com/v1/forecast?latitude=45.431&longitude=-73.742&current=temperature_2m,wind_speed_10m,wind_gusts_10m,wind_direction_10m&hourly=temperature_2m,wind_speed_10m,wind_gusts_10m,precipitation_probability&daily=sunrise,sunset&timezone=auto';
 
 const airURL =
 'https://air-quality-api.open-meteo.com/v1/air-quality?latitude=45.431&longitude=-73.742&current=us_aqi';
@@ -148,7 +155,6 @@ const airData = await airResponse.json();
 
 const current = weatherData.current;
 
-// MAIN VALUES
 document.getElementById('temp').innerHTML =
 Math.round(current.temperature_2m) + '°C';
 
@@ -161,52 +167,84 @@ Math.round(current.wind_gusts_10m) + ' km/h';
 document.getElementById('aqi').innerHTML =
 airData.current.us_aqi;
 
-// RATING
 const wind = current.wind_speed_10m;
 const gusts = current.wind_gusts_10m;
 
 let rating = '';
 let ratingClass = '';
 
-if(wind < 12 && gusts < 18){
-    rating = 'EXCELLENT 🌊';
+if(wind < 10 && gusts < 15){
+    rating = 'EXCELLENT';
     ratingClass = 'good';
 }
-else if(wind < 20){
-    rating = 'CAUTION ⚠️';
+else if(wind < 18){
+    rating = 'CAUTION';
     ratingClass = 'caution';
 }
 else{
-    rating = 'NO GO ⛔';
+    rating = 'NO GO';
     ratingClass = 'bad';
 }
 
-document.getElementById('rating').innerHTML =
-'<span class="' + ratingClass + '">' + rating + '</span>';
-
-// 🌅 DAYLIGHT FILTER
-const sunrise = new Date(weatherData.daily?.sunrise?.[0] || weatherData.hourly.time[0]);
-const sunset = new Date(weatherData.daily?.sunset?.[0] || weatherData.hourly.time[0]);
+const ratingEl = document.getElementById('rating');
+ratingEl.classList.remove('rating-good','rating-caution','rating-bad');
+ratingEl.classList.add('rating-badge');
+if(ratingClass === 'good') ratingEl.classList.add('rating-good');
+else if(ratingClass === 'caution') ratingEl.classList.add('rating-caution');
+else ratingEl.classList.add('rating-bad');
+ratingEl.textContent = rating;
 
 const hourlyDiv = document.getElementById('hourly');
 hourlyDiv.innerHTML = '';
 
-for(let i = 0; i < 24; i++){
+// determine sunrise/sunset for today and filter hourly to daylight hours
+let sunrise = null;
+let sunset = null;
+if (weatherData.daily && weatherData.daily.sunrise && weatherData.daily.sunset) {
+    try{
+        sunrise = new Date(weatherData.daily.sunrise[0]);
+        sunset = new Date(weatherData.daily.sunset[0]);
+    } catch(e){
+        sunrise = null; sunset = null;
+    }
+}
 
-    const time = new Date(weatherData.hourly.time[i]);
+const times = weatherData.hourly.time;
+const tempArr = weatherData.hourly.temperature_2m || [];
+const windArr = weatherData.hourly.wind_speed_10m || [];
+const gustsArr = weatherData.hourly.wind_gusts_10m || [];
+const precipArr = weatherData.hourly.precipitation_probability || [];
 
-    // only daylight hours
-    if(time < sunrise || time > sunset) continue;
+const daylightIndices = [];
+for (let i = 0; i < times.length; i++){
+    const t = new Date(times[i]);
+    if (sunrise && sunset){
+        if (t >= sunrise && t <= sunset){ daylightIndices.push(i); }
+    } else {
+        // fallback: choose today's hours (local date match)
+        const today = new Date();
+        if (t.getFullYear() === today.getFullYear() && t.getMonth() === today.getMonth() && t.getDate() === today.getDate()){
+            daylightIndices.push(i);
+        }
+    }
+}
 
-    const hour = weatherData.hourly.time[i].split('T')[1].slice(0,5);
+// if none found, fallback to first 12 hours
+if (daylightIndices.length === 0){
+    for (let i = 0; i < Math.min(12, times.length); i++) daylightIndices.push(i);
+}
 
+// render daylight hours
+for (const idx of daylightIndices){
+    const t = new Date(times[idx]);
+    const hourLabel = t.toLocaleTimeString([], {hour: 'numeric'});
     hourlyDiv.innerHTML += `
     <div class="hour">
-        <div>${hour}</div>
-        <div>🌡️ ${Math.round(weatherData.hourly.temperature_2m[i])}°</div>
-        <div>💨 ${Math.round(weatherData.hourly.wind_speed_10m[i])}</div>
-        <div>🌪️ ${Math.round(weatherData.hourly.wind_gusts_10m[i])}</div>
-        <div>☔ ${weatherData.hourly.precipitation_probability[i]}%</div>
+        <div>${hourLabel}</div>
+        <div>${Math.round(tempArr[idx] ?? NaN)}°C</div>
+        <div>${Math.round(windArr[idx] ?? NaN)} km/h</div>
+        <div>💨 ${Math.round(gustsArr[idx] ?? NaN)}</div>
+        <div>☔ ${precipArr[idx] ?? 0}%</div>
     </div>
     `;
 }
@@ -214,6 +252,7 @@ for(let i = 0; i < 24; i++){
 }
 
 loadWeather();
+
 setInterval(loadWeather, 600000);
 
 </script>
