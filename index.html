@@ -96,6 +96,24 @@ body{
     0 0 25px rgba(60,255,118,0.25);
 }
 
+.conditions.good{
+    border-color:#7dff6d;
+    background:linear-gradient(90deg,#092212 0%,#06210f 100%);
+    box-shadow:0 0 25px rgba(125,255,109,0.25);
+}
+
+.conditions.caution{
+    border-color:#ffd54f;
+    background:linear-gradient(90deg,#352900 0%,#08150f 100%);
+    box-shadow:0 0 25px rgba(255,213,79,0.25);
+}
+
+.conditions.bad{
+    border-color:#ff7070;
+    background:linear-gradient(90deg,#3b1111 0%,#08110f 100%);
+    box-shadow:0 0 25px rgba(255,112,112,0.25);
+}
+
 .condition-left{
     display:flex;
     align-items:center;
@@ -489,7 +507,7 @@ body{
             ☔ PRECIP
         </div>
 
-        <div class="metric-icon blue">
+        <div class="metric-icon blue" id="precipIcon">
             🌧️
         </div>
 
@@ -509,7 +527,7 @@ body{
             💨 WIND
         </div>
 
-        <div class="metric-icon blue">
+        <div class="metric-icon blue" id="windIcon">
             🌬️
         </div>
 
@@ -529,7 +547,7 @@ body{
             ⚡ GUSTS
         </div>
 
-        <div class="metric-icon purple">
+        <div class="metric-icon purple" id="gustsIcon">
             💨
         </div>
 
@@ -687,8 +705,26 @@ function getWindArrow(deg){
 
     const arrows = ['↑','↗','→','↘','↓','↙','←','↖'];
 
-    return arrows[Math.round(deg/45)%8];
+    return arrows[(Math.round(deg/45) + 4) % 8];
 
+}
+
+function getPrecipEmoji(value){
+    if(value >= 10) return '🌧️';
+    if(value > 0) return '🌦️';
+    return '☀️';
+}
+
+function getWindEmoji(speed){
+    if(speed >= 20) return '🌬️';
+    if(speed >= 10) return '💨';
+    return '🍃';
+}
+
+function getGustEmoji(speed){
+    if(speed >= 25) return '🌪️';
+    if(speed >= 15) return '💨';
+    return '🍃';
 }
 
 async function loadWeather(){
@@ -720,6 +756,10 @@ Math.round(current.wind_speed_10m);
 
 document.getElementById('gusts').innerHTML =
 Math.round(current.wind_gusts_10m);
+
+document.getElementById('precipIcon').innerHTML = getPrecipEmoji(current.precipitation);
+ document.getElementById('windIcon').innerHTML = getWindEmoji(current.wind_speed_10m);
+ document.getElementById('gustsIcon').innerHTML = getGustEmoji(current.wind_gusts_10m);
 
 document.getElementById('aqi').innerHTML =
 airData.current.us_aqi;
@@ -786,6 +826,7 @@ parseInt(weatherData.daily.sunset[0].split('T')[1]);
 let rating = '';
 let detail = '';
 let emoji = '😊';
+const conditionsBox = document.querySelector('.conditions');
 
 if(currentHour < sunriseHour || currentHour > sunsetHour){
 
@@ -807,7 +848,7 @@ else if(wind < 18){
 
     rating = 'CAUTION';
     detail = 'Moderate chop possible on open water.';
-    emoji = '🤔';
+    emoji = '🌊';
 
     document.getElementById('rating').className = 'caution';
 }
@@ -819,6 +860,9 @@ else{
 
     document.getElementById('rating').className = 'bad';
 }
+
+conditionsBox?.classList.remove('good','caution','bad');
+conditionsBox?.classList.add(document.getElementById('rating').className);
 
 document.getElementById('rating').innerHTML =
 rating;
